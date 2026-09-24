@@ -106,7 +106,8 @@ app.registerExtension({
 
         let sheet = null;
         let sheetError = false;
-        let loading = false;
+        let requestedName;   // the image value the preview last asked for (undefined = never)
+        let requestSeq = 0;  // newest load wins; an older one finishing late is dropped
         let disposed = false;
         let rafId = null;
         let activeGuide = null;
@@ -174,7 +175,7 @@ app.registerExtension({
 
         const reloadBtn = styleButton(document.createElement("button"), "#3A3F53");
         reloadBtn.innerText = "Reload";
-        reloadBtn.title = "Re-read the reference sheet from the input folder";
+        reloadBtn.title = "Re-read the selected reference sheet";
         reloadBtn.onclick = () => refreshSheet();
 
         const sizeLabel = document.createElement("span");
@@ -252,8 +253,10 @@ app.registerExtension({
 
         // ----------------------------------------------------------- loading
         async function refreshSheet() {
-            if (loading || disposed) return;
+            if (disposed) return;
             const name = findWidget(node, "image")?.value;
+            requestedName = name;
+            const seq = ++requestSeq;
             if (!name) {
                 sheet = null;
                 sheetError = false;
@@ -262,24 +265,22 @@ app.registerExtension({
                 return;
             }
 
-            loading = true;
+            setStatus("LOADING", "#66CCFF", "#15222A");
             try {
                 const loaded = await loadImage(viewUrl(name));
-                if (disposed) return;
+                if (disposed || seq !== requestSeq) return;
                 sheet = loaded;
                 sheetError = false;
                 setStatus("SHEET LOADED", "#00FF66", "#152A17");
                 sizeLabel.innerText = `${loaded.naturalWidth} x ${loaded.naturalHeight} px`;
                 node.setSize?.(node.computeSize());
             } catch (error) {
-                if (disposed) return;
+                if (disposed || seq !== requestSeq) return;
                 sheet = null;
                 sheetError = true;
                 setStatus("CANNOT READ", "#FF4444", "#2A1515");
                 sizeLabel.innerText = "";
                 console.warn("[Geekatplay] turnaround sheet could not be loaded:", error);
-            } finally {
-                loading = false;
             }
         }
 
@@ -508,6 +509,10 @@ app.registerExtension({
             rafId = requestAnimationFrame(drawLoop);
             if (timestamp - lastFrame < 33) return;
             lastFrame = timestamp;
+            // The image value can change without the combo callback firing (file browser
+            // button, upload, a workflow loaded over this node, a value set by script), so
+            // the preview follows the widget itself rather than only its callback.
+            if (findWidget(node, "image")?.value !== requestedName) refreshSheet();
             if (node.flags?.collapsed) return;
             draw();
         }
