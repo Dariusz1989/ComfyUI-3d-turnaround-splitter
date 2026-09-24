@@ -14,7 +14,7 @@
  * particular node. The buttons are not serialized: widgets_values is positional,
  * and an extra saved entry would shift every value after it on reload.
  */
-import { app } from "../../scripts/app.js";
+import { app } from "../../../scripts/app.js";
 
 const BUTTON_PREFIX = "↺ reset ";
 
