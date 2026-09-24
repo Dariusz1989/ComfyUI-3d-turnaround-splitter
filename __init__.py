@@ -18,7 +18,7 @@ Turns a single turnaround reference sheet into a finished 3D model.
 import os
 import shutil
 
-from .nodes import GeekatplayTurnaroundSplitter, GeekatplayFitResize, GeekatplayLoadViewImage
+from .nodes import GeekatplayTurnaroundSplitter, GeekatplayFitResize, GeekatplayLoadViewImage, GeekatplayStageGuard
 from .nodes.meshwright_bridge import (
     NODE_CLASS_MAPPINGS as BRIDGE_CLASS_MAPPINGS,
     NODE_DISPLAY_NAME_MAPPINGS as BRIDGE_DISPLAY_MAPPINGS,
@@ -29,6 +29,7 @@ NODE_CLASS_MAPPINGS = {
     "GeekatplayTurnaroundSplitter": GeekatplayTurnaroundSplitter,
     "GeekatplayFitResize": GeekatplayFitResize,
     "GeekatplayLoadViewImage": GeekatplayLoadViewImage,
+    "GeekatplayStageGuard": GeekatplayStageGuard,
 }
 NODE_CLASS_MAPPINGS.update(BRIDGE_CLASS_MAPPINGS)
 
@@ -36,6 +37,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "GeekatplayTurnaroundSplitter": "Turnaround Splitter (Geekatplay)",
     "GeekatplayFitResize": "Fit & Resize (Geekatplay)",
     "GeekatplayLoadViewImage": "Load View Image, outputs + mask (Geekatplay)",
+    "GeekatplayStageGuard": "3D Stage Guard (Geekatplay)",
 }
 NODE_DISPLAY_NAME_MAPPINGS.update(BRIDGE_DISPLAY_MAPPINGS)
 
