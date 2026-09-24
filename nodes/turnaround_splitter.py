@@ -75,6 +75,38 @@ def guide_boundaries(width, guides):
     return boundaries
 
 
+OUTPUT_CHOICE_LIMIT = 500
+_IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff")
+
+
+def _output_sheet_choices():
+    """Images under ComfyUI's output folder (subfolders included), newest first, as annotated
+    names such as ``turntable/sheet_00001_.png [output]``.
+
+    A sheet made by another workflow lands in output/, not input/, so without these the
+    dropdown could not offer it and a saved value pointing at it failed with "image does not
+    exist". The annotation is ComfyUI's own: ``folder_paths.get_annotated_filepath`` and
+    ``exists_annotated_filepath`` resolve it, and the preview's ``viewUrl`` already turns
+    ``[output]`` into ``/view?type=output``. Capped so a huge output folder stays cheap to list.
+    """
+    output_dir = folder_paths.get_output_directory()
+    found = []
+    for root, _dirs, names in os.walk(output_dir):
+        for name in names:
+            if name.lower().endswith(_IMAGE_SUFFIXES):
+                full = os.path.join(root, name)
+                try:
+                    found.append((os.path.getmtime(full), full))
+                except OSError:
+                    continue
+    found.sort(reverse=True)
+    choices = []
+    for _mtime, full in found[:OUTPUT_CHOICE_LIMIT]:
+        relative = os.path.relpath(full, output_dir).replace(os.sep, "/")
+        choices.append("{} [output]".format(relative))
+    return choices
+
+
 class GeekatplayTurnaroundSplitter:
     """Splits one turnaround sheet into four separate view images."""
 
@@ -87,6 +119,7 @@ class GeekatplayTurnaroundSplitter:
         ]
         if hasattr(folder_paths, "filter_files_content_types"):
             files = folder_paths.filter_files_content_types(files, ["image"])
+        files = sorted(files) + _output_sheet_choices()
 
         guide = {
             "min": 0.0,
@@ -97,7 +130,7 @@ class GeekatplayTurnaroundSplitter:
         }
         return {
             "required": {
-                "image": (sorted(files), {"image_upload": True}),
+                "image": (files, {"image_upload": True}),
                 "guide_1": ("FLOAT", dict(guide, default=0.25,
                                           tooltip="First cut, as a fraction of the sheet width.")),
                 "guide_2": ("FLOAT", dict(guide, default=0.50,
