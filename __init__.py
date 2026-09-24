@@ -9,6 +9,8 @@ Turns a single turnaround reference sheet into a finished 3D model.
   Fit & Resize          brings each view to an exact output size by extending
                         the canvas with matching background, never by
                         stretching or cropping.
+  Load View Image       one image from input/ or any output/ subfolder, with the
+                        mask painted in the Mask Editor.
   Meshwright bridge     hands the generated mesh to Meshwright for repair and
                         brings the cleaned result back.
 """
@@ -16,7 +18,7 @@ Turns a single turnaround reference sheet into a finished 3D model.
 import os
 import shutil
 
-from .nodes import GeekatplayTurnaroundSplitter, GeekatplayFitResize
+from .nodes import GeekatplayTurnaroundSplitter, GeekatplayFitResize, GeekatplayLoadViewImage
 from .nodes.meshwright_bridge import (
     NODE_CLASS_MAPPINGS as BRIDGE_CLASS_MAPPINGS,
     NODE_DISPLAY_NAME_MAPPINGS as BRIDGE_DISPLAY_MAPPINGS,
@@ -26,12 +28,14 @@ from .nodes.meshwright_bridge import (
 NODE_CLASS_MAPPINGS = {
     "GeekatplayTurnaroundSplitter": GeekatplayTurnaroundSplitter,
     "GeekatplayFitResize": GeekatplayFitResize,
+    "GeekatplayLoadViewImage": GeekatplayLoadViewImage,
 }
 NODE_CLASS_MAPPINGS.update(BRIDGE_CLASS_MAPPINGS)
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "GeekatplayTurnaroundSplitter": "Turnaround Splitter (Geekatplay)",
     "GeekatplayFitResize": "Fit & Resize (Geekatplay)",
+    "GeekatplayLoadViewImage": "Load View Image, outputs + mask (Geekatplay)",
 }
 NODE_DISPLAY_NAME_MAPPINGS.update(BRIDGE_DISPLAY_MAPPINGS)
 
